@@ -95,13 +95,15 @@ set_location_assignment PIN_AB8 -to gamepad[3]
 set_location_assignment PIN_AB9 -to gamepad[4]
 set_location_assignment PIN_Y10 -to gamepad[5]
 
-set_global_assignment -name VHDL_FILE Debouncer.vhd
-set_global_assignment -name VHDL_FILE LightCycles.vhd
-set_global_assignment -name VHDL_FILE VgaTiming.vhd
 set_global_assignment -name VHDL_FILE ClockDivider.vhd
-set_global_assignment -name VHDL_FILE TestPixelGenerator.vhd
-set_global_assignment -name VHDL_FILE LightBike.vhd
-set_global_assignment -name VHDL_FILE TrailBuffer.vhd
+set_global_assignment -name VHDL_FILE Debouncer.vhd
+set_global_assignment -name VHDL_FILE Game.vhd
+set_global_assignment -name VHDL_FILE GameCore.vhd
+set_global_assignment -name VHDL_FILE GameMemory.vhd
+set_global_assignment -name VHDL_FILE GameTick.vhd
+set_global_assignment -name VHDL_FILE LightCycles.vhd
+set_global_assignment -name VHDL_FILE Player.vhd
+set_global_assignment -name VHDL_FILE VgaTiming.vhd
 
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top

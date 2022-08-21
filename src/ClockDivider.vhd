@@ -1,34 +1,34 @@
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
 
-entity ClockDivider is
-generic (
-  RisingEdgesToSwitchAfter : integer
-);
-port (
-  Clk : in std_logic;
-  ClkOut : out std_logic
-);
-end entity;
+ENTITY ClockDivider IS
+  GENERIC (
+    RisingEdgesToSwitchAfter : INTEGER
+  );
+  PORT (
+    Clk : IN STD_LOGIC;
+    ClkOut : OUT STD_LOGIC
+  );
+END ENTITY;
 
-architecture rtl of ClockDivider is
-  signal count : integer := 0;
-  signal ClkInternal : std_logic := '0';
-begin
+ARCHITECTURE rtl OF ClockDivider IS
+  SIGNAL count : INTEGER := 0;
+  SIGNAL ClkInternal : STD_LOGIC := '0';
+BEGIN
 
-  process(Clk)
-  begin
-    if rising_edge(Clk) then
+  PROCESS (Clk)
+  BEGIN
+    IF rising_edge(Clk) THEN
       count <= count + 1;
 
-      if (count = RisingEdgesToSwitchAfter - 1) then
+      IF (count = RisingEdgesToSwitchAfter - 1) THEN
         count <= 0;
         ClkInternal <= NOT ClkInternal;
-      end if;
-    end if;
-  end process;
+      END IF;
+    END IF;
+  END PROCESS;
 
   ClkOut <= ClkInternal;
 
-end architecture;
+END ARCHITECTURE;

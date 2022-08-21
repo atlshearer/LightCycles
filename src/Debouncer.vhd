@@ -1,52 +1,52 @@
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
 
-entity Debouncer is
-  generic (
-    switch_count : positive;
-    timeout_cycles : positive
-    );
-  port (
-    clk : in std_logic;
-    rst : in std_logic;
-    switches : in std_logic_vector(switch_count - 1 downto 0);
-    switches_debounced : out std_logic_vector(switch_count - 1 downto 0)
+ENTITY Debouncer IS
+  GENERIC (
+    switch_count : POSITIVE;
+    timeout_cycles : POSITIVE
   );
-end Debouncer;
+  PORT (
+    clk : IN STD_LOGIC;
+    rst : IN STD_LOGIC;
+    switches : IN STD_LOGIC_VECTOR(switch_count - 1 DOWNTO 0);
+    switches_debounced : OUT STD_LOGIC_VECTOR(switch_count - 1 DOWNTO 0)
+  );
+END Debouncer;
 
-architecture rtl of Debouncer is
-begin
- 
-  MY_GEN : for i in 0 to switch_count - 1 generate
- 
-    signal debounced : std_logic;
-    signal counter : integer range 0 to timeout_cycles - 1;
- 
-  begin
- 
+ARCHITECTURE rtl OF Debouncer IS
+BEGIN
+
+  MY_GEN : FOR i IN 0 TO switch_count - 1 GENERATE
+
+    SIGNAL debounced : STD_LOGIC;
+    SIGNAL counter : INTEGER RANGE 0 TO timeout_cycles - 1;
+
+  BEGIN
+
     switches_debounced(i) <= debounced;
- 
-    DEBOUNCE_PROC : process(clk)
-    begin
-      if rising_edge(clk) then
-        if rst = '1' then
+
+    DEBOUNCE_PROC : PROCESS (clk)
+    BEGIN
+      IF rising_edge(clk) THEN
+        IF rst = '1' THEN
           counter <= 0;
           debounced <= switches(i);
- 
-        else
- 
-          if counter < timeout_cycles - 1 then
+
+        ELSE
+
+          IF counter < timeout_cycles - 1 THEN
             counter <= counter + 1;
-          elsif switches(i) /= debounced then
+          ELSIF switches(i) /= debounced THEN
             counter <= 0;
             debounced <= switches(i);
-          end if;
- 
-        end if;
-      end if;
-    end process;
- 
-  end generate;
- 
-end architecture;
+          END IF;
+
+        END IF;
+      END IF;
+    END PROCESS;
+
+  END GENERATE;
+
+END ARCHITECTURE;

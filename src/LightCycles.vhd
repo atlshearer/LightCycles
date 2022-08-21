@@ -1,144 +1,130 @@
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
+USE work.Game.ALL;
 
-entity LightCycles is
-port (
-  Clock50 : in std_logic;
-  vga_h_sync : out std_logic;
-  vga_v_sync : out std_logic;
+ENTITY LightCycles IS
+  PORT (
+    Clock50 : IN STD_LOGIC;
+    vga_h_sync : OUT STD_LOGIC;
+    vga_v_sync : OUT STD_LOGIC;
 
-  vga_colour_output : out std_logic_vector(0 to 11);
+    vga_colour_output : OUT STD_LOGIC_VECTOR(0 TO 11);
 
-  leds : out std_logic_vector(9 downto 0);
+    leds : OUT STD_LOGIC_VECTOR(9 DOWNTO 0);
 
-  gamepad : in std_logic_vector(5 downto 0);
-  switches : in std_logic_vector(9 downto 0)
-);
-end entity;
+    gamepad : IN STD_LOGIC_VECTOR(5 DOWNTO 0);
+    switches : IN STD_LOGIC_VECTOR(9 DOWNTO 0)
+  );
+END ENTITY;
 
-architecture rtl of LightCycles is
-  signal clock25 : std_logic;
-  signal slowClock : std_logic;
+ARCHITECTURE rtl OF LightCycles IS
+  SIGNAL clock25 : STD_LOGIC;
 
-  signal displayReady : std_logic;
+  SIGNAL displayReady : STD_LOGIC;
 
-  signal pixelIndex : integer;
-  signal rowIndex : integer;
-  signal outputColor : std_logic_vector(11 downto 0);
-  signal additionalOffset : integer := 0;
+  SIGNAL pixelIndex : INTEGER;
+  SIGNAL rowIndex : INTEGER;
 
-  signal rowMultiplier : integer;
+  SIGNAL debounced_gamepad : STD_LOGIC_VECTOR(5 DOWNTO 0);
 
-  signal debounced_gamepad : std_logic_vector(5 downto 0);
-
-  signal redBikeReady : std_logic;
-  signal redBikeColour : std_logic_vector(11 downto 0);
-  signal blueBikeReady : std_logic;
-  signal blueBikeColour : std_logic_vector(11 downto 0);
-begin
+  SIGNAL gameX : INTEGER RANGE 0 TO 100;
+  SIGNAL gameY : INTEGER RANGE 0 TO 100;
+  SIGNAL locationState : t_LocationState;
+BEGIN
 
   -----------------------------------------------------------------------------
   -- VGA Signal generation
-  clock_divider : entity work.ClockDivider(rtl)
-  generic map (
-    RisingEdgesToSwitchAfter => 1
-  )
-  port map (
-    Clk => Clock50,
-    ClkOut => clock25
-  );
-  
-  vga_timing : entity work.VgaTiming(rtl)
-  generic map (
-    hVisibleArea => 640,
-    hFrontPorch => 16,
-    hSyncPulse => 96,
-    hBackPorch => 48,
+  clock_divider : ENTITY work.ClockDivider(rtl)
+    GENERIC MAP(
+      RisingEdgesToSwitchAfter => 1
+    )
+    PORT MAP(
+      Clk => Clock50,
+      ClkOut => clock25
+    );
 
-    vVisibleArea => 480,
-    vFrontPorch => 10,
-    vSyncPulse => 2,
-    vBackPorch => 33
-  )
-  port map (
-    Clk => Clock25,
-    horizonalSync => vga_h_sync,
-    verticalSync => vga_v_sync,
-    displayReady => displayReady,
-    pixelIndex => pixelIndex,
-    rowIndex => rowIndex
-  );
+  vga_timing : ENTITY work.VgaTiming(rtl)
+    GENERIC MAP(
+      hVisibleArea => 640,
+      hFrontPorch => 16,
+      hSyncPulse => 96,
+      hBackPorch => 48,
+
+      vVisibleArea => 480,
+      vFrontPorch => 10,
+      vSyncPulse => 2,
+      vBackPorch => 33
+    )
+    PORT MAP(
+      Clk => Clock25,
+      horizonalSync => vga_h_sync,
+      verticalSync => vga_v_sync,
+      displayReady => displayReady,
+      pixelIndex => pixelIndex,
+      rowIndex => rowIndex
+    );
   -----------------------------------------------------------------------------
 
   -----------------------------------------------------------------------------
   -- Input debounce
-  gamepad_debounder: entity work.Debouncer(rtl)
-  generic map (
-    switch_count => 6,
-    timeout_cycles => 500_000
-  )
-  port map (
-    clk => Clock50,
-    rst => switches(1),
-    switches => gamepad,
-    switches_debounced => debounced_gamepad
-  );
+  gamepad_debounder : ENTITY work.Debouncer(rtl)
+    GENERIC MAP(
+      switch_count => 6,
+      timeout_cycles => 500_000
+    )
+    PORT MAP(
+      clk => Clock50,
+      rst => switches(1),
+      switches => gamepad,
+      switches_debounced => debounced_gamepad
+    );
   -----------------------------------------------------------------------------
 
-  game_clock: entity work.ClockDivider(rtl)
-  generic map (
-    RisingEdgesToSwitchAfter => 500_000
-  )
-  port map (
-    Clk => Clock50,
-    ClkOut => slowClock
-  );
+  gameX <= to_integer(unsigned(STD_LOGIC_VECTOR(to_unsigned(pixelIndex, 9))(8 DOWNTO 2)))
+    WHEN pixelIndex < 400 ELSE
+    0;
+  gameY <= to_integer(unsigned(STD_LOGIC_VECTOR(to_unsigned(rowIndex, 9))(8 DOWNTO 2)))
+    WHEN rowIndex < 400 ELSE
+    0;
 
-  red_bike: entity work.LightBike(rtl)
-  generic map (
-    BIKE_COLOUR => "111100000000"
-  )
-  port map (
-    columnIndex => pixelIndex,
-    rowIndex => rowIndex,
+  game_core : ENTITY work.GameCore(rtl)
+    PORT MAP(
+      clk => Clock50,
 
-    gameClk => slowClock,
-    pixelClk => clock25,
+      reset => debounced_gamepad(0),
 
-    moveLeft => debounced_gamepad(4),
-    moveRight =>  debounced_gamepad(5),
-    reset => switches(0),
+      player2Inputs => debounced_gamepad(5 DOWNTO 3),
 
-    colour => redBikeColour,
-    ready => redBikeReady
-  );
-  
-  blue_bike: entity work.LightBike(rtl)
-  generic map (
-    BIKE_COLOUR => "000000001111"
-  )
-  port map (
-    columnIndex => pixelIndex,
-    rowIndex => rowIndex,
+      xRead => gameX,
+      yRead => gameY,
+      locationState => locationState
+    );
 
-    gameClk => slowClock,
-    pixelClk => clock25,
+  PROCESS (clock25)
+  BEGIN
+    IF rising_edge(clock25) THEN
+      IF displayReady = '1' THEN
+        IF pixelIndex < 400 AND rowIndex < 400 THEN
+          CASE locationState IS
+            WHEN Empty =>
+              vga_colour_output <= "000000000000";
 
-    moveLeft => debounced_gamepad(1),
-    moveRight =>  debounced_gamepad(2),
-    reset => switches(1),
+            WHEN Path =>
+              vga_colour_output <= "111111111111";
 
-    colour => blueBikeColour,
-    ready => blueBikeReady
-  );
-  
-  vga_colour_output <= 
-      redBikeColour when displayReady = '1' and redBikeReady = '1' else
-      blueBikeColour when displayReady = '1' and blueBikeReady = '1' else
-      (others => '0');
+            WHEN OTHERS =>
+              vga_colour_output <= "000000000000";
+          END CASE;
+        ELSE
+          vga_colour_output <= "111100000000";
+        END IF;
+      ELSE
+        vga_colour_output <= "000000000000";
+      END IF;
+    END IF;
+  END PROCESS;
 
-  leds(5 downto 0) <= debounced_gamepad;
-  leds(6) <= slowClock;
+  leds(5 DOWNTO 0) <= debounced_gamepad;
 
-end architecture;
+END ARCHITECTURE;
