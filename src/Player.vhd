@@ -22,35 +22,42 @@ ARCHITECTURE rtl OF Player IS
   SIGNAL i_positionX : INTEGER RANGE 0 TO PLAY_AREA_WIDTH := 10;
   SIGNAL i_positionY : INTEGER RANGE 0 TO PLAY_AREA_HEIGHT := 10;
 
-  TYPE t_direction IS (Right, Down, Left, Up);
-  SIGNAL direction : t_direction := Right;
+  SIGNAL direction : INTEGER RANGE 0 TO 3;
 
   TYPE t_TurnActionState IS (Idle, LeftTurnComplete, RightTurnComplete);
   SIGNAL turnActionState : t_TurnActionState := Idle;
+
+  SIGNAL i_leftX : INTEGER RANGE 0 TO PLAY_AREA_WIDTH := 10;
+  SIGNAL i_rightX : INTEGER RANGE 0 TO PLAY_AREA_WIDTH := 10;
+  SIGNAL i_nextX : INTEGER RANGE 0 TO PLAY_AREA_WIDTH := 10;
+
+  SIGNAL i_upY : INTEGER RANGE 0 TO PLAY_AREA_HEIGHT := 10;
+  SIGNAL i_downY : INTEGER RANGE 0 TO PLAY_AREA_HEIGHT := 10;
+  SIGNAL i_nextY : INTEGER RANGE 0 TO PLAY_AREA_HEIGHT := 10;
 BEGIN
 
   positionX <= i_positionX;
   positionY <= i_positionY;
 
+  i_leftX <= i_positionX - 1;
+  i_rightX <= i_positionX + 1;
+  i_nextX <=
+    i_leftX WHEN direction = 2 ELSE
+    i_rightX WHEN direction = 0 ELSE
+    i_positionX;
+
+  i_upY <= i_positionY - 1;
+  i_downY <= i_positionY + 1;
+  i_nextY <=
+    i_upY WHEN direction = 3 ELSE
+    i_downY WHEN direction = 1 ELSE
+    i_positionY;
+
   PROCESS (gameClk)
   BEGIN
     IF rising_edge(gameClk) THEN
-      CASE direction IS
-        WHEN Right =>
-          i_positionX <= i_positionX + 1;
-
-        WHEN Down =>
-          i_positionY <= i_positionY + 1;
-
-        WHEN Left =>
-          i_positionX <= i_positionX - 1;
-
-        WHEN Up =>
-          i_positionY <= i_positionY - 1;
-
-        WHEN OTHERS =>
-          NULL;
-      END CASE;
+      i_positionX <= i_nextX;
+      i_positionY <= i_nextY;
     END IF;
   END PROCESS;
 
@@ -61,32 +68,14 @@ BEGIN
         WHEN Idle =>
           -- Turn Left
           IF leftInput = '1' AND rightInput = '0' THEN
-            CASE direction IS
-              WHEN Up =>
-                direction <= Left;
-              WHEN Down =>
-                direction <= Right;
-              WHEN Left =>
-                direction <= Down;
-              WHEN Right =>
-                direction <= Up;
-            END CASE;
+            direction <= direction - 1;
 
             turnActionState <= LeftTurnComplete;
           END IF;
 
           -- Turn Right
           IF leftInput = '0' AND rightInput = '1' THEN
-            CASE direction IS
-              WHEN Up =>
-                direction <= Right;
-              WHEN Down =>
-                direction <= Left;
-              WHEN Left =>
-                direction <= Up;
-              WHEN Right =>
-                direction <= Down;
-            END CASE;
+            direction <= direction + 1;
 
             turnActionState <= RightTurnComplete;
           END IF;
