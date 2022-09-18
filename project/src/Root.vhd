@@ -21,7 +21,7 @@ ARCHITECTURE rtl OF Root IS
   SIGNAL clk_25 : STD_LOGIC;
   SIGNAL clk_second : STD_LOGIC;
 
-  SIGNAL counter_value : STD_LOGIC_VECTOR(2 DOWNTO 0);
+  SIGNAL counter_value : STD_LOGIC_VECTOR(3 DOWNTO 0);
 
   SIGNAL displayReady : STD_LOGIC;
 
@@ -79,7 +79,7 @@ BEGIN
 
   counter : ENTITY work.Counter(rtl)
     GENERIC MAP(
-      size => 3
+      size => 4
     )
     PORT MAP(
       reset => switches(0),

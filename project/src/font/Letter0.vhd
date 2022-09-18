@@ -4,7 +4,7 @@ USE ieee.numeric_std.ALL;
 
 ENTITY Letter0 IS
   PORT (
-    input : IN INTEGER RANGE 0 TO 9;
+    input : IN INTEGER RANGE 0 TO 15;
     positionX : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
     positionY : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
 
@@ -23,6 +23,12 @@ ARCHITECTURE rtl OF Letter0 IS
   CONSTANT seven : STD_LOGIC_VECTOR(0 TO 15) := "1111100100010001";
   CONSTANT eight : STD_LOGIC_VECTOR(0 TO 15) := "0110111110010110";
   CONSTANT nine : STD_LOGIC_VECTOR(0 TO 15) := "0110100101110001";
+  CONSTANT a : STD_LOGIC_VECTOR(0 TO 15) := "0000011110010111";
+  CONSTANT b : STD_LOGIC_VECTOR(0 TO 15) := "1000111010011110";
+  CONSTANT c : STD_LOGIC_VECTOR(0 TO 15) := "0000011110000111";
+  CONSTANT d : STD_LOGIC_VECTOR(0 TO 15) := "0001011110010111";
+  CONSTANT e : STD_LOGIC_VECTOR(0 TO 15) := "0000011011110111";
+  CONSTANT f : STD_LOGIC_VECTOR(0 TO 15) := "0110010011100100";
 
 BEGIN
 
@@ -53,6 +59,18 @@ BEGIN
         fill <= eight(selection);
       WHEN 9 =>
         fill <= nine(selection);
+      WHEN 10 =>
+        fill <= a(selection);
+      WHEN 11 =>
+        fill <= b(selection);
+      WHEN 12 =>
+        fill <= c(selection);
+      WHEN 13 =>
+        fill <= d(selection);
+      WHEN 14 =>
+        fill <= e(selection);
+      WHEN 15 =>
+        fill <= f(selection);
     END CASE;
 
   END PROCESS;
