@@ -7,6 +7,7 @@ set_global_assignment -name VHDL_FILE src/Counter.vhd
 set_global_assignment -name VHDL_FILE src/TFlipFlop.vhd
 
 set_global_assignment -name VHDL_FILE src/vga/VgaTiming.vhd
+set_global_assignment -name VHDL_FILE src/vga/Vga.vhd
 set_global_assignment -name VHDL_FILE src/frequency_divider/FrequencyDivider.vhd
 
 set_global_assignment -name VHDL_FILE src/font/Letter0.vhd
