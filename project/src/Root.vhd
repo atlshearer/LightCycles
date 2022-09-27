@@ -24,6 +24,10 @@ ARCHITECTURE rtl OF Root IS
 
   SIGNAL vga_signals : t_VGA_SIGNALS;
   SIGNAL current_pixel : t_POSITION;
+  SIGNAL restricted_pixel : t_POSITION;
+
+  SIGNAL colour : STD_LOGIC_VECTOR(11 DOWNTO 0);
+  SIGNAL fill : STD_LOGIC;
 BEGIN
 
   -----------------------------------------------------------------------------
@@ -50,8 +54,30 @@ BEGIN
       vga_signals => vga_signals,
       current_pixel => current_pixel,
 
-      colour => (OTHERS => '1')
+      colour => colour
     );
-  -----------------------------------------------------------------------------
+  -----------------------------------------------------------------------------\
 
+  letter_restriction : ENTITY work.RestrictedView(rtl)
+    GENERIC MAP(
+      top_left => (x => 100, y => 100),
+      bottom_right => (x => 116, y => 116)
+    )
+    PORT MAP(
+      current_pixel => current_pixel,
+      restricted_pixel => restricted_pixel,
+      primary_colour => (OTHERS => fill),
+      secondary_colour => "000000000000",
+      output_colour => colour
+    );
+
+  letter0 : ENTITY work.Letter0(rtl)
+    PORT MAP(
+      input => to_integer(unsigned(switches(9 DOWNTO 6))),
+
+      positionX => STD_LOGIC_VECTOR(to_unsigned(restricted_pixel.x, 4))(3 DOWNTO 2),
+      positionY => STD_LOGIC_VECTOR(to_unsigned(restricted_pixel.y, 4))(3 DOWNTO 2),
+
+      fill => fill
+    );
 END ARCHITECTURE;
